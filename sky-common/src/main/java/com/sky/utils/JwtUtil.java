@@ -36,6 +36,7 @@ public class JwtUtil {
                 .setExpiration(exp);
 
         return builder.compact();
+
     }
 
     /**
