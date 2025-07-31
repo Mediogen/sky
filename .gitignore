@@ -4,3 +4,5 @@
 *.class
 *Test.java
 **/test/
+# 忽略特定环境的配置文件，因为它们包含敏感信息
+application-dev.yml
