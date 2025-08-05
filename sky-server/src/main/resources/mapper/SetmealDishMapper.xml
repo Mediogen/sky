@@ -22,5 +22,9 @@
         select s.copies,s.dish_id,s.id,d.name,d.price,s.setmeal_id from setmeal_dish s join dish d on s.dish_id = d.id where s.setmeal_id = #{setmealId}
 
     </select>
+    <select id="getDishesBySetmealId" resultType="com.sky.vo.DishItemVO">
+        select sd.copies,d.description,d.image,d.name from setmeal_dish sd join dish d on sd.dish_id = d.id
+        where sd.setmeal_id = #{setmealId}
+    </select>
 
 </mapper>

@@ -15,6 +15,7 @@ import com.sky.mapper.SetmealDishMapper;
 import com.sky.mapper.SetmealMapper;
 import com.sky.result.PageResult;
 import com.sky.service.SetmealService;
+import com.sky.vo.DishItemVO;
 import com.sky.vo.SetmealVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,7 @@ public class SetmealServiceImpl implements SetmealService {
     private DishMapper dishMapper;
 
     /**
+     * 分页查询套餐
      * @param setmealPageQueryDTO
      * @return
      */
@@ -48,6 +50,7 @@ public class SetmealServiceImpl implements SetmealService {
     }
 
     /**
+     * 根据ID查询套餐
      * @param id
      * @return
      */
@@ -64,6 +67,7 @@ public class SetmealServiceImpl implements SetmealService {
     }
 
     /**
+     * 新增套餐
      * @param setmealDTO
      */
     @Override
@@ -132,6 +136,7 @@ public class SetmealServiceImpl implements SetmealService {
     }
 
     /**
+     * 修改套餐
      * @param setmealDTO
      */
     @Override
@@ -157,5 +162,27 @@ public class SetmealServiceImpl implements SetmealService {
             setmealDish.setSetmealId(setmeal.getId());
             setmealDishMapper.add(setmealDish);
         }
+    }
+
+    /**
+     * 条件查询套餐列表
+     * @param setmeal
+     * @return List<Setmeal>
+     */
+    @Override
+    public List<Setmeal> list(Setmeal setmeal) {
+        List<Setmeal> list = setmealMapper.list(setmeal);
+        return list;
+    }
+
+    /**
+     * 根据套餐ID查询套餐下的菜品列表
+     * @param setmealId 套餐ID
+     * @return
+     */
+    @Override
+    public List<DishItemVO> getDishesBySetmealId(Long setmealId) {
+        List<DishItemVO> setmealDishes = setmealDishMapper.getDishesBySetmealId(setmealId);
+        return setmealDishes;
     }
 }

@@ -66,11 +66,17 @@ public interface SetmealMapper {
     @AutoFill(OperationType.UPDATE)
     void update(Setmeal setmeal);
 
-
     /**
      * 批量起售或停售套餐
      * @param status
      * @param ids
      */
     void updateStatusByIds(Integer status, List<Long> ids);
+
+    /**
+     * 动态条件查询套餐
+     * @param setmeal
+     * @return
+     */
+    List<Setmeal> list(Setmeal setmeal);
 }

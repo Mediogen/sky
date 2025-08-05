@@ -24,7 +24,7 @@ import java.util.Map;
 @RestController
 @Slf4j
 @RequestMapping("/user")
-@Api(tags = "用户相关接口")
+@Api(tags = "C端-用户相关接口")
 public class UserController {
 
     @Autowired

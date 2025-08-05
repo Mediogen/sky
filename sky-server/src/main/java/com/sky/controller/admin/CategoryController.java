@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * 分类管理
  */
-@RestController
+@RestController("adminCategoryController")
 @RequestMapping("/admin/category")
 @Api(tags = "分类相关接口")
 @Slf4j
@@ -28,7 +28,7 @@ public class CategoryController {
     /**
      * 新增分类
      * @param categoryDTO
-     * @return
+     * @return Result<String> 统一使用 Result 返回结果
      */
     @PostMapping
     @ApiOperation("新增分类")
@@ -41,7 +41,7 @@ public class CategoryController {
     /**
      * 分类分页查询
      * @param categoryPageQueryDTO
-     * @return
+     * @return Result<PageResult> 统一使用 Result 返回结果
      */
     @GetMapping("/page")
     @ApiOperation("分类分页查询")
@@ -53,12 +53,11 @@ public class CategoryController {
 
     /**
      * 删除分类
-     * @param id
-     * @return
+     * @param id 分类ID
      */
     @DeleteMapping
     @ApiOperation("删除分类")
-    public Result<String> deleteById(Long id){
+    public Result deleteById(Long id){
         log.info("删除分类：{}", id);
         categoryService.deleteById(id);
         return Result.success();
@@ -71,7 +70,7 @@ public class CategoryController {
      */
     @PutMapping
     @ApiOperation("修改分类")
-    public Result<String> update(@RequestBody CategoryDTO categoryDTO){
+    public Result update(@RequestBody CategoryDTO categoryDTO){
         categoryService.update(categoryDTO);
         return Result.success();
     }
