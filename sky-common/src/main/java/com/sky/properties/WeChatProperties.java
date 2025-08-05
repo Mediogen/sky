@@ -1,7 +1,6 @@
 package com.sky.properties;
 
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +11,7 @@ public class WeChatProperties {
 
     private String appid; //小程序的appid
     private String secret; //小程序的秘钥
+    private String grantType; //小程序的授权类型
     private String mchid; //商户号
     private String mchSerialNo; //商户API证书的证书序列号
     private String privateKeyFilePath; //商户私钥文件
