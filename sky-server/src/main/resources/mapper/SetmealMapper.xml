@@ -36,6 +36,13 @@
         </set>
         where id = #{id}
     </update>
+    <update id="updateStatusByIds">
+        update setmeal set status = #{status}
+        where id in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
     <delete id="deleteByIds">
         delete from setmeal where id in
         <foreach collection="ids" item="id" open="(" separator="," close=")">
