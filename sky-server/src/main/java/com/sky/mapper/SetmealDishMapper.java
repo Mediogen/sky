@@ -10,4 +10,18 @@ import java.util.List;
 public interface SetmealDishMapper {
 
     List<SetmealDish> getByDishIds(List<Long> dishIds);
+
+    List<SetmealDish> getBySetmealId(Long id);
+
+    /**
+     * 添加套餐菜品关系
+     * @param setmealdish
+     */
+    void add(SetmealDish setmealdish);
+
+    /**
+     * 批量删除套餐菜品关系
+     * @param setmealIds
+     */
+    void deleteBySetmealIds(List<Long> setmealIds);
 }
