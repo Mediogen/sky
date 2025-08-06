@@ -13,6 +13,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -77,7 +78,10 @@ public class DishController {
      */
     @PostMapping("/status/{status}")
     @ApiOperation("菜品起售、停售")
-    @CacheEvict(value = "dishesByCategory", allEntries = true) // 清除所有缓存
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "dishesByCategory", allEntries = true),
+            @CacheEvict(cacheNames = "setmealsByCategory", allEntries = true)
+    })// 清除所有相关缓存
     public Result updateStatus(@PathVariable Integer status,@RequestParam Long id) {
         log.info("菜品起售或停售接口被调用，状态：{}，菜品ID：{}", status, id);
         dishService.updateStatus(status, id);
