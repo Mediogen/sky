@@ -42,4 +42,18 @@
         </set>
         where id = #{id}
     </update>
+    <select id="getOrders" resultType="com.sky.vo.OrderVO">
+        select * from orders
+        <where>
+            <if test="status != null and status != ''">
+                status = #{status}
+            </if>
+            <if test="userId != null and userId != ''">
+                and user_id = #{userId}
+            </if>
+            <if test="id != null ">
+                and id = #{id}
+            </if>
+        </where>
+    </select>
 </mapper>
