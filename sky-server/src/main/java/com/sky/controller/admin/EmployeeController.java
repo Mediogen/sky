@@ -15,10 +15,13 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 员工管理
@@ -33,6 +36,8 @@ public class EmployeeController {
     private EmployeeService employeeService;
     @Autowired
     private JwtProperties jwtProperties;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     /**
      * 登录
@@ -54,6 +59,14 @@ public class EmployeeController {
                 jwtProperties.getAdminTtl(),
                 claims);
 
+        // --- 新增逻辑：将 Token 存入 Redis 白名单 ---
+        // key: "login_token:" + token
+        // value: employee.getId()
+        // 过期时间: jwtProperties.getAdminTtl()，单位是毫秒
+        String redisKey = "login_token:" + token;
+        redisTemplate.opsForValue().set(redisKey, employee.getId(), jwtProperties.getAdminTtl(), TimeUnit.MILLISECONDS);
+        log.info("新生成的Token已存入Redis白名单: {}", redisKey);
+
         EmployeeLoginVO employeeLoginVO = EmployeeLoginVO.builder()
                 .id(employee.getId())
                 .userName(employee.getUsername())
@@ -71,7 +84,16 @@ public class EmployeeController {
      */
     @PostMapping("/logout")
     @ApiOperation("员工退出")
-    public Result<String> logout() {
+    public Result<String> logout(HttpServletRequest request) {
+        // 从请求头中获取 token
+        String token = request.getHeader(jwtProperties.getAdminTokenName());
+
+        // --- 新增逻辑：从 Redis 白名单中删除 Token ---
+        if (token != null) {
+            String redisKey = "login_token:" + token;
+            redisTemplate.delete(redisKey);
+            log.info("用户登出，从Redis白名单中移除Token: {}", redisKey);
+        }
         return Result.success();
     }
 

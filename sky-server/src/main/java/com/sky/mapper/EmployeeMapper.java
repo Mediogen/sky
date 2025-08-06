@@ -8,7 +8,6 @@ import com.sky.enumeration.OperationType;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
 
 @Mapper
 public interface EmployeeMapper {
@@ -34,10 +33,14 @@ public interface EmployeeMapper {
     /**
      * 员工分页查询
      * @param employeePageQueryDTO
-     * @return
+     * @return Page<Employee> 分页结果
      */
     Page<Employee> page(EmployeePageQueryDTO employeePageQueryDTO);
 
+    /**
+     * 动态修改员工
+     * @param employee
+     */
     @AutoFill(OperationType.UPDATE)
     void update(Employee employee);
 
