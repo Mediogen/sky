@@ -42,18 +42,25 @@
         </set>
         where id = #{id}
     </update>
-    <select id="getOrders" resultType="com.sky.vo.OrderVO">
+    <select id="ordersPageQuery" resultType="com.sky.vo.OrderVO">
         select * from orders
         <where>
-            <if test="status != null and status != ''">
-                status = #{status}
+            <if test="number != null and number != ''">
+                and number like concat('%',#{number},'%')
             </if>
-            <if test="userId != null and userId != ''">
+            <if test="phone != null and phone != ''">
+                and phone like concat('%',#{phone},'%')
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+            <if test="userId != null">
                 and user_id = #{userId}
             </if>
-            <if test="id != null ">
-                and id = #{id}
+            <if test="beginTime != null and endTime != null">
+                and order_time between #{beginTime} and #{endTime}
             </if>
         </where>
+        order by order_time desc
     </select>
 </mapper>

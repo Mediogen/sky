@@ -1,6 +1,7 @@
 package com.sky.controller.user;
 
 
+import com.sky.context.BaseContext;
 import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
@@ -62,6 +63,8 @@ public class OrderController {
     @GetMapping("/historyOrders")
     @ApiOperation("查询历史订单")
     public Result<PageResult<OrderVO>> pageQuery(OrdersPageQueryDTO ordersPageQueryDTO){
+        // 设置当前用户ID
+        ordersPageQueryDTO.setUserId(BaseContext.getCurrentId());
         log.info("查询历史订单,分页查询参数:{}", ordersPageQueryDTO);
         PageResult<OrderVO> pageResult = orderService.pageQuery(ordersPageQueryDTO);
         return Result.success(pageResult);
@@ -79,15 +82,15 @@ public class OrderController {
     }
 
     /**
-     * 取消订单
+     * 用户取消订单
      * @param id 订单ID
      *
      */
     @PutMapping("cancel/{id}")
-    @ApiOperation("取消订单")
+    @ApiOperation("用户取消订单")
     public Result cancelOrder(@PathVariable Long id) {
-        log.info("取消订单,订单ID:{}", id);
-        orderService.cancelOrder(id);
+        log.info("用户取消订单,订单ID:{}", id);
+        orderService.cancelByUser(id);
         return Result.success();
     }
 
