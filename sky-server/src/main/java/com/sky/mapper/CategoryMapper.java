@@ -48,11 +48,19 @@ public interface CategoryMapper {
 
     /**
      * 根据类型查询分类
-     * @param type
-     * @return
+     * @param type 类型
+     * @return List<Category> 分类列表
      */
     List<Category> list(Integer type);
 
     @Select("select name from category where id = #{id}")
     String getNameById(Long id);
+
+    /**
+     * 根据id查询分类的类型
+     * @param id 分类ID
+     * @return 分类类型
+     */
+    @Select("select type from category where id = #{id}")
+    Integer getTypeById(Long id);
 }

@@ -27,7 +27,7 @@ public class OrderController {
 
     /**
      * 用户下单
-     * @param ordersSubmitDTO
+     * @param ordersSubmitDTO 下单参数
      * @return Result<OrderSubmitVO>
      */
     @PostMapping("/submit")
@@ -41,8 +41,8 @@ public class OrderController {
     /**
      * 订单支付
      *
-     * @param ordersPaymentDTO
-     * @return
+     * @param ordersPaymentDTO 支付参数
+     * @return Result<OrderPaymentVO>
      */
     @PutMapping("/payment")
     @ApiOperation("订单支付")
@@ -97,7 +97,7 @@ public class OrderController {
     /**
      * 再来一单
      * 将原订单中的商品重新加入到购物车中
-     * @param
+     * @param id 订单ID
      */
     @PostMapping("repetition/{id}")
     @ApiOperation("再来一单")

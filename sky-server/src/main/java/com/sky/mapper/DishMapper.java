@@ -8,6 +8,7 @@ import com.sky.enumeration.OperationType;
 import com.sky.vo.DishVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -50,4 +51,7 @@ public interface DishMapper {
 
     @Select("select * from dish where category_id = #{categoryId}")
     List<Dish> listByCategoryId(Long categoryId);
+
+    @Update("update dish set status = #{status} where category_id = #{CategoryId}")
+    void updateStatusByCategoryId(Integer status, Long CategoryId);
 }
