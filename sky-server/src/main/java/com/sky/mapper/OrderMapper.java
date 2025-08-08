@@ -9,6 +9,7 @@ import com.sky.vo.SqlOrderStatisticsVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
@@ -36,4 +37,7 @@ public interface OrderMapper {
 
     @Select("select status,count(0) count from orders group by status;")
     List<SqlOrderStatisticsVO> statistics();
+
+    @Select("select id from orders where status = #{pendingPayment} and order_time <= #{time}")
+    List<Long> getByStatusAndOrderTime(Integer pendingPayment, LocalDateTime time);
 }

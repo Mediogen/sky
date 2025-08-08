@@ -60,7 +60,7 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
             Claims claims = JwtUtil.parseJWT(jwtProperties.getAdminSecretKey(), token);
 
             Long empId = Long.valueOf(claims.get(JwtClaimsConstant.EMP_ID).toString());
-            log.info("当前员工id：", empId);
+            log.info("当前员工id:{}", empId);
 
             // --- 新增逻辑：校验 Redis 白名单 ---
             String redisKey = "login_token:" + token;

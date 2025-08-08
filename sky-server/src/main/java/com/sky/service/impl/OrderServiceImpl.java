@@ -282,9 +282,9 @@ public class OrderServiceImpl implements OrderService {
 
         // 修正点 2: 为所有统计字段设置默认值0。
         // 这能保证即使数据库中没有某个状态的订单，返回的JSON中该字段也是0而不是null。
-        orderStatisticsVO.setToBeConfirmed(0);
-        orderStatisticsVO.setConfirmed(0);
-        orderStatisticsVO.setDeliveryInProgress(0);
+//        orderStatisticsVO.setToBeConfirmed(0);
+//        orderStatisticsVO.setConfirmed(0);
+//        orderStatisticsVO.setDeliveryInProgress(0);
 
         // 查询各个状态的订单数量
         List<SqlOrderStatisticsVO> list = orderMapper.statistics();

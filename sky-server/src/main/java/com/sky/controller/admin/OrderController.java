@@ -42,10 +42,10 @@ public class OrderController {
      */
     @GetMapping("/statistics")
     @ApiOperation("各个状态的订单数量统计")
-    public OrderStatisticsVO statistics() {
+    public Result<OrderStatisticsVO> statistics() {
         log.info("各个状态的订单数量统计");
         OrderStatisticsVO orderStatisticsVO = orderService.statistics();
-        return orderStatisticsVO;
+        return Result.success(orderStatisticsVO);
     }
 
     /**
