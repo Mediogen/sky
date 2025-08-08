@@ -23,6 +23,7 @@ import com.sky.result.PageResult;
 import com.sky.service.OrderService;
 import com.sky.utils.HttpClientUtil;
 import com.sky.vo.*;
+import com.sky.webSocket.WebSocketServer;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,8 +48,12 @@ public class OrderServiceImpl implements OrderService {
     private AddressBookMapper addressBookMapper;
     @Autowired
     private ShoppingCartMapper shoppingCartMapper;
+    @Autowired
+    private WebSocketServer webSocketServer;
 //    @Autowired
 //    private UserMapper userMapper;
+
+
     @Value("${sky.shop.address}")
     private String shopAddress;
     @Value("${sky.baidu.ak}")
@@ -160,6 +165,10 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         orderMapper.update(orders);
+        // 发送消息通知商家订单支付成功
+        webSocketServer.sendToAdmin(1,ordersDB.getId(),outTradeNo);
+
+
     }
 
     /**
@@ -458,6 +467,28 @@ public class OrderServiceImpl implements OrderService {
                 .deliveryTime(LocalDateTime.now()) // 设置送达时间
                 .build();
         orderMapper.update(orders);
+
+    }
+
+    /**
+     * 用户催单
+     * @param id 订单ID
+     */
+    @Override
+    public void reminder(Long id) {
+        //查询订单
+        Orders orderDB = orderMapper.getOrdersById(id);
+        //校验订单是否存在
+        if (orderDB == null ) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+        //订单状态：1 待付款，2 待接单，3 已接单，4 派送中，5 已完成，6 已取消
+        //校验订单状态,只能催单待接单的订单
+        if(!orderDB.getStatus().equals(Orders.TO_BE_CONFIRMED)){
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+        //发送消息通知商家催单
+        webSocketServer.sendToAdmin(2,orderDB.getId(),orderDB.getNumber());
 
     }
 
