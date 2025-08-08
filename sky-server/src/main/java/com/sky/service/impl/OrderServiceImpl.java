@@ -186,7 +186,9 @@ public class OrderServiceImpl implements OrderService {
             }
             return new PageResult<>(Page.getTotal(), Page.getResult());
         }
-        return null;
+        //如果没有查询到订单，返回空的PageResult
+
+        return new PageResult<>(0L, new ArrayList<>());
     }
 
     /**
