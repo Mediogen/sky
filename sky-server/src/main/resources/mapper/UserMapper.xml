@@ -7,4 +7,11 @@
         INSERT INTO user (id, openid, name, phone, sex, id_number, avatar, create_time)
         VALUES (#{id}, #{openid}, #{name}, #{phone}, #{sex}, #{idNumber}, #{avatar}, #{createTime})
     </insert>
+    <select id="countUserByCreateTime" resultType="com.sky.vo.CountUserVO">
+        SELECT DATE(create_time) AS date,COUNT(0) AS newUserCount
+        FROM user
+        WHERE create_time >= #{begin} AND create_time &lt;= #{endPlusOne}
+        GROUP BY DATE(create_time)
+        ORDER BY date
+    </select>
 </mapper>

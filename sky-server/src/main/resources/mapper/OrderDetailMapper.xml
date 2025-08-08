@@ -10,4 +10,19 @@
             (#{item.name}, #{item.image}, #{item.orderId}, #{item.dishId}, #{item.setmealId}, #{item.dishFlavor}, #{item.amount})
         </foreach>
     </insert>
+    <select id="salesTop10" resultType="com.sky.vo.SalesTop10VO">
+        SELECT name,SUM(j.number) AS total_number
+        FROM order_detail j join orders o on order_id = o.id
+        <where>
+            <if test="begin != null">
+                AND checkout_time >= #{begin}
+            </if>
+            <if test="endPlusOne != null">
+                AND checkout_time &lt; #{endPlusOne}
+            </if>
+        </where>
+        GROUP BY name
+        order by total_number desc
+        limit 10;
+    </select>
 </mapper>

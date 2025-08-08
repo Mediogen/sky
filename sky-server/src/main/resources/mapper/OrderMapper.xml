@@ -63,4 +63,28 @@
         </where>
         order by order_time desc
     </select>
+    <select id="sumAmountByCheckoutTime" resultType="com.sky.vo.SumAmountVO">
+        SELECT DATE(checkout_time) AS date,SUM(amount) AS turnover
+        FROM orders
+        WHERE checkout_time >= #{begin} AND checkout_time &lt;= #{endPlusOne} AND status = #{status}
+        GROUP BY DATE(checkout_time)
+        ORDER BY date
+    </select>
+    <select id="countOrdersByCheckoutTime" resultType="com.sky.vo.CountOrdersVO">
+        SELECT DATE(checkout_time) AS date,COUNT(0) AS OrdersCount
+        FROM orders
+        <where>
+            <if test="begin != null">
+                AND checkout_time >= #{begin}
+            </if>
+            <if test="endPlusOne != null">
+                AND checkout_time &lt; #{endPlusOne}
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+        </where>
+        GROUP BY DATE(checkout_time)
+        ORDER BY date
+    </select>
 </mapper>
