@@ -10,6 +10,7 @@ import com.sky.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -32,54 +33,85 @@ public class WorkspaceServiceImpl implements WorkspaceService {
      * @return BusinessDataVO 今日运营数据
      */
     @Override
-    public BusinessDataVO getBusinessData() {
-        Double turnover = 0.0;//营业额
-        Integer validOrderCount = 0;//有效订单数
-        Double orderCompletionRate = 0.0;//订单完成率
-        Double unitPrice = 0.0;//平均客单价
-        Integer newUsers = 0;//新增用户数
+    public BusinessDataVO getBusinessData(LocalDate begin, LocalDate end) {
+        // ========== 1. 初始化累加变量 ==========
+        BigDecimal totalTurnover = BigDecimal.ZERO; // 使用BigDecimal累加营业额，更精确
+        Long totalValidOrderCount = 0L;           // 累加有效订单数
+        Long totalNewUsers = 0L;                  // 累加新增用户数
+        Long totalOrderCount = 0L;                // 累加总订单数
 
-        // 获取今日的日期
-        LocalDate today = LocalDate.now();
-        // 1. 获取今日营业额
-        List<SumAmountVO> list = orderMapper.sumAmountByCheckoutTime(today, today.plusDays(1), Orders.COMPLETED);
-        if (list != null && !list.isEmpty()) {
-            // 因为我们只查询了一天，所以这个列表最多只会有一个元素。
-            // 直接获取第一个元素的turnover即可。
-            turnover = list.get(0).getTurnover().doubleValue();
+        // ========== 2. 调用已有的Mapper方法，查询【整个时间段】的聚合数据 ==========
+
+        // 准备时间参数（左闭右开区间）
+        LocalDate endDatePlusOne = end.plusDays(1);
+
+        // a. 获取时间段内，【每日】的营业额列表
+        List<SumAmountVO> turnoverList = orderMapper.sumAmountByCheckoutTime(begin, endDatePlusOne, Orders.COMPLETED);
+
+        // b. 获取时间段内，【每日】的有效订单数列表
+        List<CountOrdersVO> validOrderList = orderMapper.countOrdersByCheckoutTime(begin, endDatePlusOne, Orders.COMPLETED);
+
+        // c. 获取时间段内，【每日】的总订单数列表
+        List<CountOrdersVO> allOrderList = orderMapper.countOrdersByCheckoutTime(begin, endDatePlusOne, null);
+
+        // d. 获取时间段内，【每日】的新增用户数列表
+        List<CountUserVO> newUserList = userMapper.countUserByCreateTime(begin, endDatePlusOne);
+
+
+        // ========== 3. 在内存中对查询结果进行【累加】处理 ==========
+
+        // a. 累加总营业额
+        if (turnoverList != null && !turnoverList.isEmpty()) {
+            // 使用Stream API对BigDecimal进行求和
+            totalTurnover = turnoverList.stream()
+                    .map(SumAmountVO::getTurnover)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
         }
-        // 2. 获取今日有效订单数
-        List<CountOrdersVO> list2 = orderMapper.countOrdersByCheckoutTime(today, today.plusDays(1),Orders.COMPLETED);
-        if (list2 != null && !list2.isEmpty()) {
-            validOrderCount = list2.get(0).getOrdersCount().intValue();
+
+        // b. 累加总有效订单数
+        if (validOrderList != null && !validOrderList.isEmpty()) {
+            // 使用Stream API对Integer进行求和
+            totalValidOrderCount = validOrderList.stream()
+                    .mapToLong(CountOrdersVO::getOrdersCount)
+                    .sum();
         }
-        // 3. 获取今日新增用户数
-        List<CountUserVO> list3 = userMapper.countUserByCreateTime(today, today.plusDays(1));
-        if (list3 != null && !list3.isEmpty()) {
-            newUsers = list3.get(0).getNewUserCount().intValue();
+
+        // c. 累加总订单数
+        if (allOrderList != null && !allOrderList.isEmpty()) {
+            totalOrderCount = allOrderList.stream()
+                    .mapToLong(CountOrdersVO::getOrdersCount)
+                    .sum();
         }
-        //4. 计算订单完成率
-        // 获取今日所有订单
-        List<CountOrdersVO> allOrders = orderMapper.countOrdersByCheckoutTime(today, today.plusDays(1), null);
-        if (allOrders != null && !allOrders.isEmpty()) {
-            int totalOrders = allOrders.get(0).getOrdersCount().intValue();
-            if (totalOrders > 0) {
-                orderCompletionRate = (double) validOrderCount / totalOrders;
-            }
+
+        // d. 累加总新增用户数
+        if (newUserList != null && !newUserList.isEmpty()) {
+            totalNewUsers = newUserList.stream()
+                    .mapToLong(CountUserVO::getNewUserCount)
+                    .sum();
         }
-        // 5. 计算平均客单价(其实可以直接用营业额除以有效订单数，我犯唐了)
-        List<AvgAmountVO> avgAmountList = orderMapper.avgAmountByCheckoutTime(today, today.plusDays(1), Orders.COMPLETED);
-        if (avgAmountList != null && !avgAmountList.isEmpty()) {
-            unitPrice = avgAmountList.get(0).getAvgAmount().doubleValue();
-        }
+
+
+        // ========== 4. 基于累加结果，进行最终计算 ==========
+
+        // a. 计算订单完成率
+        Double orderCompletionRate = (totalOrderCount == 0) ? 0.0 : totalValidOrderCount.doubleValue() / totalOrderCount;
+
+        // b. 计算平均客单价
+        Double unitPrice = (totalValidOrderCount == 0) ? 0.0 : totalTurnover.doubleValue() / totalValidOrderCount;
+
+
+        // ========== 5. 封装并返回最终的BusinessDataVO ==========
+
         return BusinessDataVO.builder()
-                .turnover(turnover)
-                .validOrderCount(validOrderCount)
+                .turnover(totalTurnover.doubleValue()) // 按需转换为double
+                .validOrderCount(totalValidOrderCount.intValue())
                 .orderCompletionRate(orderCompletionRate)
                 .unitPrice(unitPrice)
-                .newUsers(newUsers)
+                .newUsers(totalNewUsers.intValue())
                 .build();
     }
+
+
 
     /**
      * 查询订单管理数据
