@@ -50,7 +50,7 @@ public class ReportServiceImpl implements ReportService {
         Map<LocalDate, BigDecimal> turnoverMap = sumAmountVOList.stream()
                 .collect(Collectors.toMap(SumAmountVO::getDate, SumAmountVO::getTurnover));
 
-        // 步骤二：数据处理 - 填充并补全
+        // 步骤二：数据处理
         // ===================================
 
         // 1. 创建两个空列表
@@ -91,6 +91,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     /**
+     * 用户统计
      * @param begin 统计的开始日期
      * @param end 统计的结束日期
      * @return UserReportVO 用户统计结果
@@ -107,7 +108,7 @@ public class ReportServiceImpl implements ReportService {
         Map<LocalDate,Long> countUserMap = sumAmountVOList.stream()
                 .collect(Collectors.toMap(CountUserVO::getDate, CountUserVO::getNewUserCount));
 
-        // 步骤二：数据处理 - 填充并补全
+        // 步骤二：数据处理
         // ===================================
 
         // 1. 创建3个空列表
@@ -157,9 +158,10 @@ public class ReportServiceImpl implements ReportService {
     }
 
     /**
-     * @param begin
-     * @param end
-     * @return
+     * 订单统计
+     * @param begin 统计的开始日期
+     * @param end 统计的结束日期
+     * @return OrderReportVO 订单统计结果
      */
     @Override
     public OrderReportVO ordersStatistics(LocalDate begin, LocalDate end) {
@@ -217,6 +219,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     /**
+     * 销量排名前10的菜品或套餐
      * @return SalesTop10ReportVO 销量排名前10的VO
      */
     @Override

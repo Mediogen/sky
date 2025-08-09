@@ -83,4 +83,7 @@ public interface SetmealMapper {
 
     @Update("update setmeal set status = #{status} where category_id = #{CategoryId}")
     void updateStatusByCategoryId(Integer status, Long CategoryId);
+
+    @Select("select count(id) from setmeal where status = #{i}")
+    Integer setmealCountByStatus(int i);
 }

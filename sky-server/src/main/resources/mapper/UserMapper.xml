@@ -10,7 +10,7 @@
     <select id="countUserByCreateTime" resultType="com.sky.vo.CountUserVO">
         SELECT DATE(create_time) AS date,COUNT(0) AS newUserCount
         FROM user
-        WHERE create_time >= #{begin} AND create_time &lt;= #{endPlusOne}
+        WHERE create_time >= #{begin} AND create_time &lt; #{endPlusOne}
         GROUP BY DATE(create_time)
         ORDER BY date
     </select>

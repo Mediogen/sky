@@ -4,10 +4,7 @@ package com.sky.mapper;
 import com.github.pagehelper.Page;
 import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.entity.Orders;
-import com.sky.vo.CountOrdersVO;
-import com.sky.vo.OrderVO;
-import com.sky.vo.SqlOrderStatisticsVO;
-import com.sky.vo.SumAmountVO;
+import com.sky.vo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -38,8 +35,8 @@ public interface OrderMapper {
     @Select("select * from orders where id = #{id}")
     OrderVO getOrdersById(Long id);
 
-    @Select("select status,count(0) count from orders group by status;")
-    List<SqlOrderStatisticsVO> statistics();
+    //@Select("select status,count(0) count from orders group by status;")
+    List<SqlOrderStatisticsVO> statistics(LocalDate begin, LocalDate endPlusOne);
 
     @Select("select id from orders where status = #{pendingPayment} and order_time <= #{time}")
     List<Long> getByStatusAndOrderTime(Integer pendingPayment, LocalDateTime time);
@@ -47,4 +44,6 @@ public interface OrderMapper {
     List<SumAmountVO> sumAmountByCheckoutTime(LocalDate begin, LocalDate endPlusOne, Integer status);
 
     List<CountOrdersVO> countOrdersByCheckoutTime(LocalDate begin, LocalDate endPlusOne, Integer status);
+
+    List<AvgAmountVO> avgAmountByCheckoutTime(LocalDate begin, LocalDate endPlusOne, Integer status);
 }

@@ -298,7 +298,7 @@ public class OrderServiceImpl implements OrderService {
 //        orderStatisticsVO.setDeliveryInProgress(0);
 
         // 查询各个状态的订单数量
-        List<SqlOrderStatisticsVO> list = orderMapper.statistics();
+        List<SqlOrderStatisticsVO> list = orderMapper.statistics(null,null);
 
         // 仅在列表有效时才进行遍历和赋值
         if (list != null && !list.isEmpty()) {
