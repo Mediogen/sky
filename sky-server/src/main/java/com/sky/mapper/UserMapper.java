@@ -2,7 +2,7 @@ package com.sky.mapper;
 
 
 import com.sky.entity.User;
-import com.sky.vo.CountUserVO;
+import com.sky.vo.CountUser;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -23,7 +23,7 @@ public interface UserMapper {
     @Select("select * from user where id = #{userId}")
     User getById(Long userId);
 
-    List<CountUserVO> countUserByCreateTime(LocalDate begin, LocalDate endPlusOne);
+    List<CountUser> countUserByCreateTime(LocalDate begin, LocalDate endPlusOne);
 
     @Select("select count(0) from user where  create_time < #{time}")
     Long countUserBeforeDate(LocalDateTime time);

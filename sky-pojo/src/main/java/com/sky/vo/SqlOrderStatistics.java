@@ -5,7 +5,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 @Data
-public class SqlOrderStatisticsVO implements Serializable {
+public class SqlOrderStatistics implements Serializable {
     // 订单状态
     private Integer status;
 

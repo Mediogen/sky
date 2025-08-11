@@ -2,7 +2,7 @@ package com.sky.mapper;
 
 
 import com.sky.entity.OrderDetail;
-import com.sky.vo.SalesTop10VO;
+import com.sky.vo.SalesTop10;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -18,5 +18,5 @@ public interface OrderDetailMapper {
     List<OrderDetail> getByOrderId(Long id);
 
 
-    List<SalesTop10VO> salesTop10(LocalDate begin, LocalDate endPlusOne);
+    List<SalesTop10> salesTop10(LocalDate begin, LocalDate endPlusOne);
 }

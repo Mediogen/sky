@@ -46,16 +46,16 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         LocalDate endDatePlusOne = end.plusDays(1);
 
         // a. 获取时间段内，【每日】的营业额列表
-        List<SumAmountVO> turnoverList = orderMapper.sumAmountByCheckoutTime(begin, endDatePlusOne, Orders.COMPLETED);
+        List<SumAmount> turnoverList = orderMapper.sumAmountByCheckoutTime(begin, endDatePlusOne, Orders.COMPLETED);
 
         // b. 获取时间段内，【每日】的有效订单数列表
-        List<CountOrdersVO> validOrderList = orderMapper.countOrdersByCheckoutTime(begin, endDatePlusOne, Orders.COMPLETED);
+        List<CountOrders> validOrderList = orderMapper.countOrdersByCheckoutTime(begin, endDatePlusOne, Orders.COMPLETED);
 
         // c. 获取时间段内，【每日】的总订单数列表
-        List<CountOrdersVO> allOrderList = orderMapper.countOrdersByCheckoutTime(begin, endDatePlusOne, null);
+        List<CountOrders> allOrderList = orderMapper.countOrdersByCheckoutTime(begin, endDatePlusOne, null);
 
         // d. 获取时间段内，【每日】的新增用户数列表
-        List<CountUserVO> newUserList = userMapper.countUserByCreateTime(begin, endDatePlusOne);
+        List<CountUser> newUserList = userMapper.countUserByCreateTime(begin, endDatePlusOne);
 
 
         // ========== 3. 在内存中对查询结果进行【累加】处理 ==========
@@ -64,29 +64,29 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         if (turnoverList != null && !turnoverList.isEmpty()) {
             // 使用Stream API对BigDecimal进行求和
             totalTurnover = turnoverList.stream()
-                    .map(SumAmountVO::getTurnover)
+                    .map(SumAmount::getTurnover)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
         }
 
         // b. 累加总有效订单数
         if (validOrderList != null && !validOrderList.isEmpty()) {
-            // 使用Stream API对Integer进行求和
+            // 使用Stream API对Long进行求和
             totalValidOrderCount = validOrderList.stream()
-                    .mapToLong(CountOrdersVO::getOrdersCount)
+                    .mapToLong(CountOrders::getOrdersCount)
                     .sum();
         }
 
         // c. 累加总订单数
         if (allOrderList != null && !allOrderList.isEmpty()) {
             totalOrderCount = allOrderList.stream()
-                    .mapToLong(CountOrdersVO::getOrdersCount)
+                    .mapToLong(CountOrders::getOrdersCount)
                     .sum();
         }
 
         // d. 累加总新增用户数
         if (newUserList != null && !newUserList.isEmpty()) {
             totalNewUsers = newUserList.stream()
-                    .mapToLong(CountUserVO::getNewUserCount)
+                    .mapToLong(CountUser::getNewUserCount)
                     .sum();
         }
 
@@ -103,7 +103,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         // ========== 5. 封装并返回最终的BusinessDataVO ==========
 
         return BusinessDataVO.builder()
-                .turnover(totalTurnover.doubleValue()) // 按需转换为double
+                .turnover(totalTurnover.doubleValue())
                 .validOrderCount(totalValidOrderCount.intValue())
                 .orderCompletionRate(orderCompletionRate)
                 .unitPrice(unitPrice)
@@ -122,11 +122,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     public OrderOverViewVO overviewOrders() {
         OrderOverViewVO orderOverViewVO = new OrderOverViewVO(0,0,0,0,0);
         LocalDate today = LocalDate.now();
-        List<SqlOrderStatisticsVO> statistics = orderMapper.statistics(today, today.plusDays(1));
+        List<SqlOrderStatistics> statistics = orderMapper.statistics(today, today.plusDays(1));
 
         Integer allOrders = 0;
         if (statistics != null && !statistics.isEmpty()) {
-            for (SqlOrderStatisticsVO statistic : statistics) {
+            for (SqlOrderStatistics statistic : statistics) {
                 Integer status = statistic.getStatus();
                 Integer count = statistic.getCount();
                 //使用if-else判断来设置不同状态的订单数量
@@ -188,4 +188,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
                 .sold(sold)
                 .build();
     }
+
+
 }

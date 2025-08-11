@@ -7,12 +7,21 @@ import com.sky.mapper.OrderDetailMapper;
 import com.sky.mapper.OrderMapper;
 import com.sky.mapper.UserMapper;
 import com.sky.service.ReportService;
+import com.sky.service.WorkspaceService;
 import com.sky.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,6 +40,8 @@ public class ReportServiceImpl implements ReportService {
     private UserMapper userMapper;
     @Autowired
     private OrderDetailMapper orderDetailMapper;
+    @Autowired
+    private WorkspaceService workspaceService; // 假设这个服务已经实现了相关的业务逻辑
 
     /**
      * 营业额统计
@@ -45,10 +56,10 @@ public class ReportServiceImpl implements ReportService {
         // 步骤一：准备数据 - 查询并转换
         // ===================================
         LocalDate endDatePlusOne = endDate.plusDays(1);
-        List<SumAmountVO> sumAmountVOList = orderMapper.sumAmountByCheckoutTime(beginDate, endDatePlusOne, Orders.COMPLETED);
+        List<SumAmount> sumAmountList = orderMapper.sumAmountByCheckoutTime(beginDate, endDatePlusOne, Orders.COMPLETED);
 
-        Map<LocalDate, BigDecimal> turnoverMap = sumAmountVOList.stream()
-                .collect(Collectors.toMap(SumAmountVO::getDate, SumAmountVO::getTurnover));
+        Map<LocalDate, BigDecimal> turnoverMap = sumAmountList.stream()
+                .collect(Collectors.toMap(SumAmount::getDate, SumAmount::getTurnover));
 
         // 步骤二：数据处理
         // ===================================
@@ -100,13 +111,13 @@ public class ReportServiceImpl implements ReportService {
     public UserReportVO userStatistics(LocalDate begin, LocalDate end) {
         // 步骤一：准备数据 - 查询并转换
         // ===================================
-        List<CountUserVO> sumAmountVOList = userMapper.countUserByCreateTime(begin, end.plusDays(1));
+        List<CountUser> sumAmountVOList = userMapper.countUserByCreateTime(begin, end.plusDays(1));
         //查询beginDate之前的用户数
         LocalDateTime beginDateTime = begin.atStartOfDay();
         Long totalUserCount = userMapper.countUserBeforeDate(beginDateTime);
 
         Map<LocalDate,Long> countUserMap = sumAmountVOList.stream()
-                .collect(Collectors.toMap(CountUserVO::getDate, CountUserVO::getNewUserCount));
+                .collect(Collectors.toMap(CountUser::getDate, CountUser::getNewUserCount));
 
         // 步骤二：数据处理
         // ===================================
@@ -166,14 +177,14 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public OrderReportVO ordersStatistics(LocalDate begin, LocalDate end) {
 
-        List<CountOrdersVO> completedList = orderMapper
+        List<CountOrders> completedList = orderMapper
                 .countOrdersByCheckoutTime(begin, end.plusDays(1), Orders.COMPLETED);
-        List<CountOrdersVO> allStatusList = orderMapper
+        List<CountOrders> allStatusList = orderMapper
                 .countOrdersByCheckoutTime(begin, end.plusDays(1), null);
         Map<LocalDate,Long> completedMap = completedList.stream()
-                .collect(Collectors.toMap(CountOrdersVO::getDate, CountOrdersVO::getOrdersCount));
+                .collect(Collectors.toMap(CountOrders::getDate, CountOrders::getOrdersCount));
         Map<LocalDate,Long> allStatusMap = allStatusList.stream()
-                .collect(Collectors.toMap(CountOrdersVO::getDate, CountOrdersVO::getOrdersCount));
+                .collect(Collectors.toMap(CountOrders::getDate, CountOrders::getOrdersCount));
 
         List<LocalDate> dateList = new ArrayList<>();
         List<Long> validOrderCountList = new ArrayList<>();
@@ -225,15 +236,15 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public SalesTop10ReportVO top10(LocalDate begin, LocalDate end) {
 
-        List<SalesTop10VO> salesTop10VOList = orderDetailMapper.salesTop10(begin, end.plusDays(1));
+        List<SalesTop10> salesTop10List = orderDetailMapper.salesTop10(begin, end.plusDays(1));
 
-        List<String> nameList = salesTop10VOList.stream()
-                .map(SalesTop10VO::getName)
+        List<String> nameList = salesTop10List.stream()
+                .map(SalesTop10::getName)
                 .collect(Collectors.toList());
         String nameListStr = StringUtils.join(nameList, ",");
 
-        List<Long> numberList = salesTop10VOList.stream()
-                .map(SalesTop10VO::getTotalNumber)
+        List<Long> numberList = salesTop10List.stream()
+                .map(SalesTop10::getTotalNumber)
                 .collect(Collectors.toList());
         String numberListStr = StringUtils.join(numberList, ",");
 
@@ -244,4 +255,57 @@ public class ReportServiceImpl implements ReportService {
                 .build();
 
     }
+
+    /**
+     * 导出Excel报表
+     * @param response HttpServletResponse
+     */
+    @Override
+    public void exportExcel(HttpServletResponse response) {
+        //查数据库，获取营业额数据
+        BusinessDataVO total=  workspaceService.getBusinessData(LocalDate.now().minusDays(30),
+                LocalDate.now().minusDays(1));
+        //读取模版
+        InputStream in = this.getClass().getClassLoader().getResourceAsStream("template/运营数据报表模板.xlsx");
+        if (in == null) {
+            throw new RuntimeException("模版文件不存在");
+        }
+        //创建Excel工作簿
+        try {
+            Workbook workbook = new XSSFWorkbook(in);
+            //填充total数据
+            XSSFSheet sheet1 = (XSSFSheet) workbook.getSheet("sheet1");
+            sheet1.getRow(1).getCell(1).setCellValue(LocalDate.now().minusDays(30)+"至"+LocalDate.now().minusDays(1));
+            XSSFRow row3 = sheet1.getRow(3);
+            row3.getCell(2).setCellValue(total.getTurnover());
+            row3.getCell(4).setCellValue(total.getOrderCompletionRate());
+            row3.getCell(6).setCellValue(total.getNewUsers());
+            XSSFRow row4 = sheet1.getRow(4);
+            row4.getCell(2).setCellValue(total.getValidOrderCount());
+            row4.getCell(4).setCellValue(total.getUnitPrice());
+            //填充前30天的营业额数据
+            for(int i = 0; i < 30; i++) {
+                LocalDate date = LocalDate.now().minusDays(30 - i);
+                BusinessDataVO businessData = workspaceService.getBusinessData(date, date);
+                XSSFRow row = sheet1.getRow(7 + i);
+                row.getCell(1).setCellValue(date.toString());
+                row.getCell(2).setCellValue(businessData.getTurnover());
+                row.getCell(3).setCellValue(businessData.getValidOrderCount());
+                row.getCell(4).setCellValue(businessData.getOrderCompletionRate());
+                row.getCell(5).setCellValue(businessData.getUnitPrice());
+                row.getCell(6).setCellValue(businessData.getNewUsers());
+            }
+            ServletOutputStream out = response.getOutputStream();
+            workbook.write(out);
+            out.close();
+            workbook.close();
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
+
+    }
+
 }

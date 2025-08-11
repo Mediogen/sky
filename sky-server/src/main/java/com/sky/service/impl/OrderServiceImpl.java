@@ -21,6 +21,7 @@ import com.sky.mapper.OrderMapper;
 import com.sky.mapper.ShoppingCartMapper;
 import com.sky.result.PageResult;
 import com.sky.service.OrderService;
+import com.sky.service.WorkspaceService;
 import com.sky.utils.HttpClientUtil;
 import com.sky.vo.*;
 import com.sky.webSocket.WebSocketServer;
@@ -50,6 +51,8 @@ public class OrderServiceImpl implements OrderService {
     private ShoppingCartMapper shoppingCartMapper;
     @Autowired
     private WebSocketServer webSocketServer;
+    @Autowired
+    private WorkspaceService workspaceService;
 //    @Autowired
 //    private UserMapper userMapper;
 
@@ -298,13 +301,13 @@ public class OrderServiceImpl implements OrderService {
 //        orderStatisticsVO.setDeliveryInProgress(0);
 
         // 查询各个状态的订单数量
-        List<SqlOrderStatisticsVO> list = orderMapper.statistics(null,null);
+        List<SqlOrderStatistics> list = orderMapper.statistics(null,null);
 
         // 仅在列表有效时才进行遍历和赋值
         if (list != null && !list.isEmpty()) {
-            for (SqlOrderStatisticsVO sqlOrderStatisticsVO : list) {
-                Integer status = sqlOrderStatisticsVO.getStatus();
-                Integer count = sqlOrderStatisticsVO.getCount();
+            for (SqlOrderStatistics sqlOrderStatistics : list) {
+                Integer status = sqlOrderStatistics.getStatus();
+                Integer count = sqlOrderStatistics.getCount();
                 // 使用 if-else if 结构替代 switch
                 if (status.equals(Orders.TO_BE_CONFIRMED)) {
                     orderStatisticsVO.setToBeConfirmed(count);
@@ -491,6 +494,7 @@ public class OrderServiceImpl implements OrderService {
         webSocketServer.sendToAdmin(2,orderDB.getId(),orderDB.getNumber());
 
     }
+
 
     /**
      * 检查客户的收货地址是否超出配送范围

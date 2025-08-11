@@ -36,14 +36,14 @@ public interface OrderMapper {
     OrderVO getOrdersById(Long id);
 
     //@Select("select status,count(0) count from orders group by status;")
-    List<SqlOrderStatisticsVO> statistics(LocalDate begin, LocalDate endPlusOne);
+    List<SqlOrderStatistics> statistics(LocalDate begin, LocalDate endPlusOne);
 
     @Select("select id from orders where status = #{pendingPayment} and order_time <= #{time}")
     List<Long> getByStatusAndOrderTime(Integer pendingPayment, LocalDateTime time);
 
-    List<SumAmountVO> sumAmountByCheckoutTime(LocalDate begin, LocalDate endPlusOne, Integer status);
+    List<SumAmount> sumAmountByCheckoutTime(LocalDate begin, LocalDate endPlusOne, Integer status);
 
-    List<CountOrdersVO> countOrdersByCheckoutTime(LocalDate begin, LocalDate endPlusOne, Integer status);
+    List<CountOrders> countOrdersByCheckoutTime(LocalDate begin, LocalDate endPlusOne, Integer status);
 
-    List<AvgAmountVO> avgAmountByCheckoutTime(LocalDate begin, LocalDate endPlusOne, Integer status);
+    List<AvgAmount> avgAmountByCheckoutTime(LocalDate begin, LocalDate endPlusOne, Integer status);
 }

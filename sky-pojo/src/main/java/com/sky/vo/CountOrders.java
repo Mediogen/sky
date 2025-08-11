@@ -5,7 +5,7 @@ import lombok.Data;
 import java.time.LocalDate;
 
 @Data
-public class CountOrdersVO {
+public class CountOrders {
     private LocalDate date;
 
     private Long OrdersCount;

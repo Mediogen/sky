@@ -63,14 +63,14 @@
         </where>
         order by order_time desc
     </select>
-    <select id="sumAmountByCheckoutTime" resultType="com.sky.vo.SumAmountVO">
+    <select id="sumAmountByCheckoutTime" resultType="com.sky.vo.SumAmount">
         SELECT DATE(checkout_time) AS date,SUM(amount) AS turnover
         FROM orders
         WHERE checkout_time >= #{begin} AND checkout_time &lt; #{endPlusOne} AND status = #{status}
         GROUP BY DATE(checkout_time)
         ORDER BY date
     </select>
-    <select id="countOrdersByCheckoutTime" resultType="com.sky.vo.CountOrdersVO">
+    <select id="countOrdersByCheckoutTime" resultType="com.sky.vo.CountOrders">
         SELECT DATE(checkout_time) AS date,COUNT(0) AS OrdersCount
         FROM orders
         <where>
@@ -87,14 +87,14 @@
         GROUP BY DATE(checkout_time)
         ORDER BY date
     </select>
-    <select id="avgAmountByCheckoutTime" resultType="com.sky.vo.AvgAmountVO">
+    <select id="avgAmountByCheckoutTime" resultType="com.sky.vo.AvgAmount">
         SELECT DATE(checkout_time) AS date,AVG(amount) AS avgAmount
         FROM orders
         WHERE checkout_time >= #{begin} AND checkout_time &lt; #{endPlusOne} AND status = #{status}
         GROUP BY DATE(checkout_time)
         ORDER BY date
     </select>
-    <select id="statistics" resultType="com.sky.vo.SqlOrderStatisticsVO">
+    <select id="statistics" resultType="com.sky.vo.SqlOrderStatistics">
         select status,count(0) count from orders
         <where>
             <if test="begin != null">
