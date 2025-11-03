@@ -3,10 +3,12 @@ package com.sky;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+@ServletComponentScan// 开启对Servlet组件的扫描支持
 @SpringBootApplication
 @EnableTransactionManagement //开启注解方式的事务管理 Spring Transaction
 @Slf4j

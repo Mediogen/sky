@@ -25,9 +25,11 @@ public class AutoFillAspect {
     @Pointcut("execution(* com.sky.mapper.*.*(..)) && @annotation(com.sky.annotation.AutoFill)")
     public void autoFillPointcut() {}
 
+    // 前置通知：在指定的切点方法执行前执行
     @Before("autoFillPointcut()")
     public void autoFill(JoinPoint joinPoint) {
         log.info("自动填充切面开始执行...");
+        // 通过反射获取注解信息
         // 获取方法上的 @AutoFill 注解
         //1. 获取方法签名对象
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
@@ -36,6 +38,7 @@ public class AutoFillAspect {
 
         //3. 获取注解的值--数据库操作类型
         OperationType operationType = autoFill.value();
+        // 通过反射获取方法参数，进而获取实体对象
         //4.获得方法参数--实体对象
         Object[] args = joinPoint.getArgs();
         if (args.length == 0 || args[0] == null) {

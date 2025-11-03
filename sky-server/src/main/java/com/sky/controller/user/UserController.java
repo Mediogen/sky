@@ -35,7 +35,7 @@ public class UserController {
 
     @PostMapping("/user/login")
     @ApiOperation("用户登录")
-    public Result login(@RequestBody UserLoginDTO userLoginDTO) {
+    public Result<UserLoginVO> login(@RequestBody UserLoginDTO userLoginDTO) {
         log.info("用户登录：{}", userLoginDTO);
         User user = userService.login(userLoginDTO.getCode());
         //生成token

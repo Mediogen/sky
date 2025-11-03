@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 @Component
 @Slf4j
-public class WebSccketTask {
+public class WebSocketTask {
     @Autowired
     private WebSocketServer webSocketServer;
     // 定时任务示例

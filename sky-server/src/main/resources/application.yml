@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8070
 
 spring:
   profiles:
@@ -16,6 +16,12 @@ spring:
     port: ${sky.redis.port}
     password: ${sky.redis.password}
     database: ${sky.redis.database}
+  rabbitmq:
+    host: localhost
+    port: 5672
+    virtual-host: /sky
+    username: sky
+    password: 123
 
 mybatis:
   #mapper配置文件

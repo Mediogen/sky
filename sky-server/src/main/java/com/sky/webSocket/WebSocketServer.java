@@ -73,21 +73,24 @@ public class WebSocketServer {
         }
     }
 
-    public void sendToAdmin(Integer type,Long orderId,String orderNo){
+    public void sendToAdmin(Integer type,Long orderId,String orderNumber){
         String messageType;
         if (type == 1) {
             messageType = "来单提醒";
         } else if (type == 2) {
             messageType = "客户催单";
+        } else if (type == 3) {
+            // TODO 该类型前端未实现
+            messageType = "订单超时未支付已取消";
         } else {
             messageType = "未知类型: " + type; // 处理未知情况
         }
-        log.info("发送消息到管理员，类型：{}，订单ID：{}，订单号：{}", messageType, orderId, orderNo);
+        log.info("发送消息到管理员，类型：{}，订单ID：{}，订单号：{}", messageType, orderId, orderNumber);
 
         Map map = new HashMap<>();
         map.put("type", type);
         map.put("orderId", orderId);
-        map.put("content", "订单号"+ orderNo);
+        map.put("content", "订单号"+ orderNumber);
         String jsonMessage = JSON.toJSONString(map);
         sendToAllClient(jsonMessage);
 

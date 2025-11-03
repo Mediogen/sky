@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.sky.config.OrderDelayQueueConfig;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
 import com.sky.dto.*;
@@ -25,6 +26,8 @@ import com.sky.service.WorkspaceService;
 import com.sky.utils.HttpClientUtil;
 import com.sky.vo.*;
 import com.sky.webSocket.WebSocketServer;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,6 +42,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 
+@Slf4j
 @Service
 public class OrderServiceImpl implements OrderService {
     @Autowired
@@ -55,6 +59,8 @@ public class OrderServiceImpl implements OrderService {
     private WorkspaceService workspaceService;
 //    @Autowired
 //    private UserMapper userMapper;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
 
     @Value("${sky.shop.address}")
@@ -108,6 +114,27 @@ public class OrderServiceImpl implements OrderService {
         }
         );
         orderDetailMapper.insertBatch(orderDetailList);
+
+        // ================== 新增：发送延迟消息 ==================
+        // 向延时队列中添加订单信息，设置延时时间为30分钟
+        try {
+            System.out.println("发送延迟消息，订单号: " + order.getNumber() + ", 延时: " + OrderDelayQueueConfig.ORDER_TTL + "ms");
+            rabbitTemplate.convertAndSend(
+                    OrderDelayQueueConfig.ORDER_EXCHANGE_NORMAL,
+                    OrderDelayQueueConfig.ORDER_ROUTING_KEY_NORMAL,
+                    order.getNumber(), // 发送订单号
+                    message -> {
+                        // 设置消息的过期时间
+                        message.getMessageProperties().setExpiration(String.valueOf(OrderDelayQueueConfig.ORDER_TTL));
+                        return message;
+                    }
+            );
+        } catch (Exception e) {
+            // 处理消息发送失败的情况，例如记录日志，或者后续通过定时任务补偿
+            log.error("发送订单超时延迟消息失败，订单好: {}", order.getNumber(), e);
+        }
+        // ======================================================
+
 
         //清空购物车
         shoppingCartMapper.cleanByUserId(BaseContext.getCurrentId());

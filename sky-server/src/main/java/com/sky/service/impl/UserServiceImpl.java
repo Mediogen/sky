@@ -10,9 +10,9 @@ import com.sky.mapper.UserMapper;
 import com.sky.properties.WeChatProperties;
 import com.sky.service.UserService;
 import com.sky.utils.HttpClientUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,10 +22,10 @@ public class UserServiceImpl implements UserService {
 
     private static final String WX_LOGIN = "https://api.weixin.qq.com/sns/jscode2session";
 
-    @Autowired
+    @Resource
     private UserMapper userMapper;
 
-    @Autowired
+    @Resource
     private WeChatProperties weChatProperties;
     /**
      * @param code
